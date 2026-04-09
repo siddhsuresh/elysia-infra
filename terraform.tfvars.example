@@ -1,13 +1,11 @@
 # Copy to terraform.tfvars and fill in your values
-region             = "us-east-1"
-name               = "elysia"
-vpc_id             = "vpc-xxxxxxxxx"
-public_subnet_ids  = ["subnet-aaa", "subnet-bbb"]
-private_subnet_ids = ["subnet-ccc", "subnet-ddd"]
-container_port     = 3000
-task_cpu           = 256
-task_memory        = 512
-desired_count      = 1
+region         = "us-east-1"
+name           = "elysia"
+vpc_cidr       = "10.0.0.0/16"
+container_port = 3000
+task_cpu       = 256
+task_memory    = 512
+desired_count  = 1
 
 # Optional: set to enable HTTPS on the ALB
 # certificate_arn = "arn:aws:acm:us-east-1:123456789012:certificate/xxxxxxxx"

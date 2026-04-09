@@ -1,6 +1,6 @@
 resource "aws_security_group" "ecs_tasks" {
   name_prefix = "${var.name}-ecs-"
-  vpc_id      = var.vpc_id
+  vpc_id      = aws_vpc.main.id
 
   # Allow traffic from ALB
   ingress {
@@ -102,7 +102,7 @@ resource "aws_ecs_service" "app" {
   launch_type     = "FARGATE"
 
   network_configuration {
-    subnets          = var.private_subnet_ids
+    subnets          = aws_subnet.private[*].id
     security_groups  = [aws_security_group.ecs_tasks.id]
     assign_public_ip = false
   }
@@ -113,14 +113,12 @@ resource "aws_ecs_service" "app" {
     container_port   = var.container_port
   }
 
-  deployment_configuration {
-    minimum_healthy_percent = 100
-    maximum_percent         = 200
+  deployment_minimum_healthy_percent = 100
+  deployment_maximum_percent         = 200
 
-    deployment_circuit_breaker {
-      enable   = true
-      rollback = false # Deploy manager handles rollback
-    }
+  deployment_circuit_breaker {
+    enable   = true
+    rollback = false # Deploy manager handles rollback
   }
 
   propagate_tags          = "TASK_DEFINITION"

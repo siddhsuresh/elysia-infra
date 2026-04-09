@@ -1,6 +1,6 @@
 resource "aws_security_group" "alb" {
   name_prefix = "${var.name}-alb-"
-  vpc_id      = var.vpc_id
+  vpc_id      = aws_vpc.main.id
 
   ingress {
     from_port   = 80
@@ -35,7 +35,7 @@ resource "aws_lb" "main" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb.id]
-  subnets            = var.public_subnet_ids
+  subnets            = aws_subnet.public[*].id
 
   tags = { Name = var.name }
 }
@@ -44,7 +44,7 @@ resource "aws_lb_target_group" "app" {
   name_prefix = "ely-"
   port        = var.container_port
   protocol    = "HTTP"
-  vpc_id      = var.vpc_id
+  vpc_id      = aws_vpc.main.id
   target_type = "ip"
 
   health_check {

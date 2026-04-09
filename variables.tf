@@ -8,19 +8,10 @@ variable "name" {
   default = "elysia"
 }
 
-variable "vpc_id" {
+variable "vpc_cidr" {
   type        = string
-  description = "VPC ID where all resources will be created"
-}
-
-variable "public_subnet_ids" {
-  type        = list(string)
-  description = "Public subnets for the ALB"
-}
-
-variable "private_subnet_ids" {
-  type        = list(string)
-  description = "Private subnets for ECS tasks"
+  default     = "10.0.0.0/16"
+  description = "CIDR block for the VPC"
 }
 
 variable "container_port" {
