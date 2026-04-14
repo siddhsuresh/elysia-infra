@@ -8,6 +8,12 @@ variable "name" {
   default = "elysia"
 }
 
+variable "suffix" {
+  type        = string
+  description = "Short suffix appended to globally-unique resource names (ECR, IAM, ALB, log group, ECS cluster) to avoid collisions across deploys. Use something like 'dev', 'prod', or your initials."
+  default     = "dev"
+}
+
 variable "vpc_cidr" {
   type        = string
   default     = "10.0.0.0/16"

@@ -31,13 +31,13 @@ resource "aws_security_group" "alb" {
 }
 
 resource "aws_lb" "main" {
-  name               = var.name
+  name               = local.prefix
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb.id]
   subnets            = aws_subnet.public[*].id
 
-  tags = { Name = var.name }
+  tags = { Name = local.prefix }
 }
 
 resource "aws_lb_target_group" "app" {

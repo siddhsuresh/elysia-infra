@@ -59,6 +59,11 @@ output "ecr_repository_name" {
   value = aws_ecr_repository.app.name
 }
 
+# ── CloudWatch ──
+output "log_group_name" {
+  value = aws_cloudwatch_log_group.app.name
+}
+
 # ── Task Definition ──
 output "task_definition_arn" {
   value = aws_ecs_task_definition.app.arn

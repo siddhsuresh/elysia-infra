@@ -89,9 +89,9 @@ resource "aws_ecs_task_definition" "app" {
 }
 
 resource "aws_cloudwatch_log_group" "app" {
-  name              = "/ecs/${var.name}-app"
+  name              = "/ecs/${local.prefix}-app"
   retention_in_days = 30
-  tags              = { Name = "${var.name}-app" }
+  tags              = { Name = "${local.prefix}-app" }
 }
 
 resource "aws_ecs_service" "app" {

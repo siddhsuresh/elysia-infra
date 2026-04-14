@@ -1,5 +1,5 @@
 resource "aws_ecr_repository" "app" {
-  name                 = "${var.name}-app"
+  name                 = "${local.prefix}-app"
   image_tag_mutability = "MUTABLE"
   force_delete         = true
 
@@ -7,7 +7,7 @@ resource "aws_ecr_repository" "app" {
     scan_on_push = true
   }
 
-  tags = { Name = "${var.name}-app" }
+  tags = { Name = "${local.prefix}-app" }
 }
 
 resource "aws_ecr_lifecycle_policy" "app" {

@@ -5,7 +5,7 @@ terraform {
     organization = "siddhsuresh_dev"
 
     workspaces {
-      name = "dev"
+      name = "deployment_manager"
     }
   }
 

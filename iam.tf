@@ -11,9 +11,9 @@ data "aws_iam_policy_document" "ecs_assume" {
 
 # Execution role — used by the ECS agent to pull images and write logs
 resource "aws_iam_role" "execution" {
-  name               = "${var.name}-ecs-execution"
+  name               = "${local.prefix}-ecs-execution"
   assume_role_policy = data.aws_iam_policy_document.ecs_assume.json
-  tags               = { Name = "${var.name}-ecs-execution" }
+  tags               = { Name = "${local.prefix}-ecs-execution" }
 }
 
 resource "aws_iam_role_policy_attachment" "execution_base" {
@@ -23,7 +23,7 @@ resource "aws_iam_role_policy_attachment" "execution_base" {
 
 # Task role — assumed by the running container
 resource "aws_iam_role" "task" {
-  name               = "${var.name}-ecs-task"
+  name               = "${local.prefix}-ecs-task"
   assume_role_policy = data.aws_iam_policy_document.ecs_assume.json
-  tags               = { Name = "${var.name}-ecs-task" }
+  tags               = { Name = "${local.prefix}-ecs-task" }
 }

@@ -1,12 +1,12 @@
 resource "aws_ecs_cluster" "main" {
-  name = var.name
+  name = local.prefix
 
   setting {
     name  = "containerInsights"
     value = "enabled"
   }
 
-  tags = { Name = var.name }
+  tags = { Name = local.prefix }
 }
 
 resource "aws_ecs_cluster_capacity_providers" "main" {

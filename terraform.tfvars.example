@@ -1,6 +1,10 @@
 # Copy to terraform.tfvars and fill in your values
 region         = "us-east-1"
 name           = "elysia"
+# suffix is appended to globally-unique resource names (ECR, IAM roles, ALB,
+# CloudWatch log group, ECS cluster) to prevent ResourceAlreadyExistsException.
+# Use something short and meaningful: "dev", "prod", "ss" (initials), etc.
+suffix         = "dev"
 vpc_cidr       = "10.0.0.0/16"
 container_port = 3000
 task_cpu       = 256
