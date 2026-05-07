@@ -73,6 +73,16 @@ output "test_listener_arn" {
   value = local.is_bluegreen ? aws_lb_listener.test[0].arn : null
 }
 
+# Strategy-conditional service-ARNs array — `[]` in rolling, `[green_arn]` in
+# bluegreen. Spread as `- ...<<stack.output.bluegreen_extra_service_arns>>`
+# under `ecs_service_arns` in module YAML, so a single deployment block works
+# for both strategies (Ravion infers strategy from the count: 1 = rolling, 2
+# = bluegreen). Target groups and listeners are auto-discovered by the deploy
+# manager — they're NOT part of the module deployment schema.
+output "bluegreen_extra_service_arns" {
+  value = local.is_bluegreen ? [aws_ecs_service.app_green[0].id] : []
+}
+
 # ── IAM ──
 output "execution_role_arn" {
   value = aws_iam_role.execution.arn
