@@ -73,6 +73,28 @@ output "test_listener_arn" {
   value = local.is_bluegreen ? aws_lb_listener.test[0].arn : null
 }
 
+# ── Strategy-conditional arrays (for module.yaml array-spread directives) ──
+# These let a single Ravion module.yaml use array-spread `...<<stack.output.X>>`
+# to produce a 1-entry list in rolling and a 2-entry list in bluegreen — without
+# any conditionals in the module YAML itself. Each output is `[]` in rolling and
+# populated in bluegreen.
+output "bluegreen_extra_service_arns" {
+  value = local.is_bluegreen ? [aws_ecs_service.app_green[0].id] : []
+}
+
+output "bluegreen_extra_target_group_arns" {
+  value = local.is_bluegreen ? [aws_lb_target_group.app_green[0].arn] : []
+}
+
+# Listeners array — `[]` in rolling, `[{listener_arn, mode}]` in bluegreen.
+# Spread as `- ...<<stack.output.bluegreen_listeners>>` under `ecs_listeners`.
+output "bluegreen_listeners" {
+  value = local.is_bluegreen ? [{
+    listener_arn = var.certificate_arn != "" ? aws_lb_listener.https[0].arn : aws_lb_listener.http.arn
+    mode         = "default_action"
+  }] : []
+}
+
 # ── IAM ──
 output "execution_role_arn" {
   value = aws_iam_role.execution.arn
