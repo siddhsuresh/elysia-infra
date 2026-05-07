@@ -7,13 +7,25 @@ output "cluster_name" {
   value = aws_ecs_cluster.main.name
 }
 
-# ── Service ──
+# ── Services ──
+# In rolling mode `service_arn` is the only service. In bluegreen mode it's the
+# blue (live) service at apply time; promote physically swaps blue↔green ARNs
+# in Ravion's EcsDeploymentSlot row, but the terraform-managed resource keeps
+# its name and ARN.
 output "service_arn" {
   value = aws_ecs_service.app.id
 }
 
 output "service_name" {
   value = aws_ecs_service.app.name
+}
+
+output "blue_service_arn" {
+  value = aws_ecs_service.app.id
+}
+
+output "green_service_arn" {
+  value = local.is_bluegreen ? aws_ecs_service.app_green[0].id : null
 }
 
 # ── ALB ──
@@ -33,12 +45,32 @@ output "target_group_arn" {
   value = aws_lb_target_group.app.arn
 }
 
+output "blue_target_group_arn" {
+  value = aws_lb_target_group.app.arn
+}
+
+output "green_target_group_arn" {
+  value = local.is_bluegreen ? aws_lb_target_group.app_green[0].arn : null
+}
+
 output "http_listener_arn" {
   value = aws_lb_listener.http.arn
 }
 
 output "https_listener_arn" {
   value = length(aws_lb_listener.https) > 0 ? aws_lb_listener.https[0].arn : null
+}
+
+# Production listener — the one Ravion's promote workflow flips between blue
+# and green target groups. HTTPS when a cert is provided, otherwise HTTP.
+output "production_listener_arn" {
+  value = var.certificate_arn != "" ? aws_lb_listener.https[0].arn : aws_lb_listener.http.arn
+}
+
+# Test listener (bluegreen only) — :8080 pinned to the green TG for previewing
+# the standby before promoting.
+output "test_listener_arn" {
+  value = local.is_bluegreen ? aws_lb_listener.test[0].arn : null
 }
 
 # ── IAM ──

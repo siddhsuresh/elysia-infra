@@ -45,3 +45,19 @@ variable "certificate_arn" {
   default     = ""
   description = "ACM certificate ARN for HTTPS. Leave empty for HTTP only."
 }
+
+# "rolling": one ECS service, one target group, listener forwards to it (current behavior).
+# "bluegreen": adds a second (green) service + target group + a port-8080 test listener
+# pinned to green. Ravion's promote workflow flips the production listener's
+# default_action between the two TGs. Switching to "bluegreen" is additive — the
+# existing rolling resources keep their state addresses, so flipping back is clean.
+variable "deployment_strategy" {
+  type        = string
+  default     = "rolling"
+  description = "Deployment strategy: 'rolling' or 'bluegreen'."
+
+  validation {
+    condition     = contains(["rolling", "bluegreen"], var.deployment_strategy)
+    error_message = "deployment_strategy must be 'rolling' or 'bluegreen'."
+  }
+}
