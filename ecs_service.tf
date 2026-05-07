@@ -133,3 +133,49 @@ resource "aws_ecs_service" "app" {
 
   tags = { Name = "${var.name}-app" }
 }
+
+# Green (standby) service — only created in bluegreen mode. Same task-def
+# family, SG, and subnets as blue, but attached to the green target group.
+# Ravion's bluegreen deploy registers new task-def revisions on this service
+# while blue keeps serving traffic; the promote workflow then flips the
+# production listener's default_action from blue's TG to green's TG.
+resource "aws_ecs_service" "app_green" {
+  count = local.is_bluegreen ? 1 : 0
+
+  name            = "${var.name}-app-green"
+  cluster         = aws_ecs_cluster.main.id
+  task_definition = aws_ecs_task_definition.app.arn
+  desired_count   = var.desired_count
+  launch_type     = "FARGATE"
+
+  network_configuration {
+    subnets          = aws_subnet.private[*].id
+    security_groups  = [aws_security_group.ecs_tasks.id]
+    assign_public_ip = false
+  }
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.app_green[0].arn
+    container_name   = "${var.name}-app"
+    container_port   = var.container_port
+  }
+
+  deployment_minimum_healthy_percent = 100
+  deployment_maximum_percent         = 200
+
+  deployment_circuit_breaker {
+    enable   = true
+    rollback = false
+  }
+
+  propagate_tags          = "TASK_DEFINITION"
+  enable_ecs_managed_tags = true
+
+  lifecycle {
+    ignore_changes = [task_definition, desired_count]
+  }
+
+  depends_on = [aws_lb_listener.http]
+
+  tags = { Name = "${var.name}-app-green" }
+}

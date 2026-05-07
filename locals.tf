@@ -3,5 +3,6 @@ locals {
   # CloudWatch log group, ECS cluster). Scoped resources like the ECS service
   # name and container name stay as "${var.name}-app" since they don't need
   # to be globally unique within the account/region.
-  prefix = "${var.name}-${var.suffix}"
+  prefix       = "${var.name}-${var.suffix}"
+  is_bluegreen = var.deployment_strategy == "bluegreen"
 }
