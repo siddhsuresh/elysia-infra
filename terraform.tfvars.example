@@ -13,3 +13,8 @@ desired_count  = 1
 
 # Optional: set to enable HTTPS on the ALB
 # certificate_arn = "arn:aws:acm:us-east-1:123456789012:certificate/xxxxxxxx"
+
+# Ravion DNS control plane demo
+ravion_base_url = "http://localhost:8080"
+ravion_api_key  = "<DomainProviderClaims JWT — paste output of the authtest mint snippet>"
+demo_domain     = "demo.your-controlled-domain.com"
