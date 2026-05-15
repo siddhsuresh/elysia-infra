@@ -14,8 +14,9 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
-    ravion = {
-      source = "ravion.dev/ravion/ravion"
+    domains = {
+      source  = "ravion.com/ravion/domains"
+      version = "~> 0.1"
     }
   }
 }
