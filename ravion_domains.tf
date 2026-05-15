@@ -15,12 +15,13 @@ resource "domains_app_domain" "default" {
   wildcard = false
 }
 
-# 2. One-per-cluster wildcard cert covering everything under the apex.
-#    Provider Create blocks until ACM marks it ISSUED (typically 30-90s).
+# 2. One-per-cluster wildcard cert covering the platform apex. The apex is
+#    resolved server-side from the cluster's platform config — the user
+#    doesn't need to know or pin it. Provider Create blocks until ACM
+#    marks it ISSUED (typically 30-90s).
 resource "domains_cluster_certificate" "default" {
   aws_account_id = "aws_cl4wla7bp00003u68ncsxkxz6"
   aws_region     = var.region
-  wildcard_apex  = "flightcontrol-development.com"
 }
 
 # 3. Point the allocated FQDN at the ALB via A-ALIAS. ALB requires aliasing
