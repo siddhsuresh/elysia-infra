@@ -1,8 +1,7 @@
 resource "domains_module_certificate" "demo" {
-  # Empty aws_account_id makes api-go fall back to RuntimeAwsCredentials
-  # (its own IAM identity) rather than assuming a cross-account role.
-  # See packages/api-go/server/setup/dns_control_plane.go:loadAwsAccountForFactory.
-  aws_account_id = ""
+  # Real Ravion AwsAccount row id. api-go calls NewACMClientFromAwsAccount and
+  # cross-account-assumes the role recorded on that row to issue the ACM cert.
+  aws_account_id = "aws_cl4wla7bp00003u68ncsxkxz6"
   aws_region     = var.region
   domains        = [var.demo_domain]
 
