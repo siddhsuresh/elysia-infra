@@ -27,9 +27,9 @@ resource "domains_cluster_certificate" "default" {
 #    (not CNAME) at the apex of the allocated name; ALIAS works for both
 #    the apex and subdomains.
 resource "domains_dns_record" "default_alb" {
-  app_domain_id = domains_app_domain.default.id
-  name          = ""
-  type          = "ALIAS"
+  domain_id = domains_app_domain.default.id
+  name      = ""
+  type      = "ALIAS"
   value = jsonencode({
     dns_name = aws_lb.main.dns_name
     zone_id  = aws_lb.main.zone_id
