@@ -40,27 +40,16 @@ variable "desired_count" {
   default = 1
 }
 
+variable "demo_domain" {
+  description = "FQDN to issue the demo cert for. The user must control DNS for this so they can add the ACM validation CNAMEs that show up in the Ravion Domains tab."
+  type        = string
+}
+
 # "rolling": one ECS service, one target group, listener forwards to it (current behavior).
 # "bluegreen": adds a second (green) service + target group + a port-8080 test listener
 # pinned to green. Ravion's promote workflow flips the production listener's
 # default_action between the two TGs. Switching to "bluegreen" is additive — the
 # existing rolling resources keep their state addresses, so flipping back is clean.
-variable "ravion_base_url" {
-  description = "URL of the Ravion api-go server the TF provider talks to."
-  type        = string
-  default     = "http://localhost:8080"
-}
-
-variable "ravion_api_key" {
-  description = "DomainProviderClaims JWT minted via the authtest helper in the dns-provider repo. See INFRA_PROMPT.md for the mint snippet."
-  type        = string
-  sensitive   = true
-}
-
-variable "demo_domain" {
-  description = "FQDN to issue the demo cert for. The user must control DNS for this so they can add the ACM validation CNAMEs that show up in the Ravion Domains tab."
-  type        = string
-}
 
 variable "deployment_strategy" {
   type        = string
