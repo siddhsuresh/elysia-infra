@@ -136,17 +136,17 @@ resource "aws_lb_listener" "http" {
   }
 }
 
-# HTTPS listener — production listener. Initially serves the bootstrap
-# self-signed cert (see bootstrap_cert.tf for why); once
-# domains_module_certificate.demo issues the real cert, api-go's reconciler
-# attaches it as an additional SNI cert on this listener via the listener_arn
-# wired on that resource.
+# HTTPS listener — production listener. Default cert is the Ravion-managed
+# cluster wildcard (already ISSUED by the time the provider returns; see
+# domains_cluster_certificate.default in ravion_domains.tf), so the listener
+# is creatable on first apply with no bootstrap. Customer domain certs get
+# attached as additional SNI certs by api-go's reconciler when they ISSUE.
 resource "aws_lb_listener" "https" {
   load_balancer_arn = aws_lb.main.arn
   port              = 443
   protocol          = "HTTPS"
   ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
-  certificate_arn   = aws_acm_certificate.bootstrap.arn
+  certificate_arn   = domains_cluster_certificate.default.cert_arn
 
   default_action {
     type             = "forward"
