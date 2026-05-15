@@ -5,9 +5,12 @@ resource "domains_module_certificate" "demo" {
   aws_region     = var.region
   domains        = [var.demo_domain]
 
-  # No listener_arn — alb.tf consumes cert_arn directly so no bootstrap cert
-  # is needed. Trade-off: skips testing the listener_arn auto-attach path
-  # (used for cert rotation / SNI add-cert flows).
+  # Wire the listener so api-go's reconciler attaches the cert as an
+  # additional SNI cert on this listener once ACM marks it ISSUED. The
+  # listener itself is bootstrapped with a self-signed cert (see
+  # bootstrap_cert.tf) — the auto-attach swap happens out-of-band, no
+  # second `terraform apply` needed.
+  listener_arn = aws_lb_listener.https.arn
 }
 
 output "ravion_demo_cert_arn" {

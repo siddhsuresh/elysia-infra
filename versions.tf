@@ -18,6 +18,10 @@ terraform {
       source  = "ravion.com/ravion/domains"
       version = "~> 0.1"
     }
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 4.0"
+    }
   }
 }
 

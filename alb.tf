@@ -136,15 +136,17 @@ resource "aws_lb_listener" "http" {
   }
 }
 
-# HTTPS listener — production listener. cert_arn is returned by the Ravion
-# provider at Create time (PENDING_VALIDATION); the cert becomes ISSUED once
-# DNS validation CNAMEs resolve. ALB serves the cert in either state.
+# HTTPS listener — production listener. Initially serves the bootstrap
+# self-signed cert (see bootstrap_cert.tf for why); once
+# domains_module_certificate.demo issues the real cert, api-go's reconciler
+# attaches it as an additional SNI cert on this listener via the listener_arn
+# wired on that resource.
 resource "aws_lb_listener" "https" {
   load_balancer_arn = aws_lb.main.arn
   port              = 443
   protocol          = "HTTPS"
   ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
-  certificate_arn   = domains_module_certificate.demo.cert_arn
+  certificate_arn   = aws_acm_certificate.bootstrap.arn
 
   default_action {
     type             = "forward"
