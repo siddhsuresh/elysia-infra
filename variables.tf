@@ -40,12 +40,6 @@ variable "desired_count" {
   default = 1
 }
 
-variable "certificate_arn" {
-  type        = string
-  default     = ""
-  description = "ACM certificate ARN for HTTPS. Leave empty for HTTP only."
-}
-
 # "rolling": one ECS service, one target group, listener forwards to it (current behavior).
 # "bluegreen": adds a second (green) service + target group + a port-8080 test listener
 # pinned to green. Ravion's promote workflow flips the production listener's

@@ -58,13 +58,14 @@ output "http_listener_arn" {
 }
 
 output "https_listener_arn" {
-  value = length(aws_lb_listener.https) > 0 ? aws_lb_listener.https[0].arn : null
+  value = aws_lb_listener.https.arn
 }
 
 # Production listener — the one Ravion's promote workflow flips between blue
-# and green target groups. HTTPS when a cert is provided, otherwise HTTP.
+# and green target groups. HTTPS is always present now that the Ravion cert
+# is wired in directly.
 output "production_listener_arn" {
-  value = var.certificate_arn != "" ? aws_lb_listener.https[0].arn : aws_lb_listener.http.arn
+  value = aws_lb_listener.https.arn
 }
 
 # Test listener (bluegreen only) — :8080 pinned to the green TG for previewing

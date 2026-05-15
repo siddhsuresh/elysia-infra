@@ -114,30 +114,21 @@ resource "aws_lb_target_group" "app_green" {
   }
 }
 
-# HTTP listener — either redirect to HTTPS or forward to target group.
-# In bluegreen mode this listener IS the production listener whenever no cert
-# is set, so Ravion mutates default_action during promote — ignore_changes
-# preserves the flip across `terraform apply`. In rolling mode the lifecycle
-# block is harmless (default_action only ever points at the single TG).
+# HTTP listener — always redirects to HTTPS (HTTPS always exists now that
+# the Ravion-issued cert is wired in directly via domains_module_certificate).
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.main.arn
   port              = 80
   protocol          = "HTTP"
 
   default_action {
-    type = var.certificate_arn != "" ? "redirect" : "forward"
+    type = "redirect"
 
-    dynamic "redirect" {
-      for_each = var.certificate_arn != "" ? [1] : []
-      content {
-        port        = "443"
-        protocol    = "HTTPS"
-        status_code = "HTTP_301"
-      }
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
     }
-
-    # Only set target_group_arn when NOT redirecting
-    target_group_arn = var.certificate_arn == "" ? aws_lb_target_group.app.arn : null
   }
 
   lifecycle {
@@ -145,16 +136,15 @@ resource "aws_lb_listener" "http" {
   }
 }
 
-# HTTPS listener — only created when certificate is provided. Production
-# listener for bluegreen when HTTPS is enabled.
+# HTTPS listener — production listener. cert_arn is returned by the Ravion
+# provider at Create time (PENDING_VALIDATION); the cert becomes ISSUED once
+# DNS validation CNAMEs resolve. ALB serves the cert in either state.
 resource "aws_lb_listener" "https" {
-  count = var.certificate_arn != "" ? 1 : 0
-
   load_balancer_arn = aws_lb.main.arn
   port              = 443
   protocol          = "HTTPS"
   ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
-  certificate_arn   = var.certificate_arn
+  certificate_arn   = domains_module_certificate.demo.cert_arn
 
   default_action {
     type             = "forward"
