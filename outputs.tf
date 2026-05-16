@@ -74,14 +74,25 @@ output "test_listener_arn" {
   value = local.is_bluegreen ? aws_lb_listener.test[0].arn : null
 }
 
-# Strategy-conditional service-ARNs array — `[]` in rolling, `[green_arn]` in
-# bluegreen. Spread as `- ...<<stack.output.bluegreen_extra_service_arns>>`
-# under `ecs_service_arns` in module YAML, so a single deployment block works
-# for both strategies (Ravion infers strategy from the count: 1 = rolling, 2
-# = bluegreen). Target groups and listeners are auto-discovered by the deploy
-# manager — they're NOT part of the module deployment schema.
-output "bluegreen_extra_service_arns" {
-  value = local.is_bluegreen ? [aws_ecs_service.app_green[0].id] : []
+# Pre-shaped `ecs_service_arns` array — exactly what the module deployment's
+# `infrastructure.ecs_service_arns` field expects. `[blue]` in rolling,
+# `[blue, green]` in bluegreen. Reference as a single block-mode template
+# expression in the module YAML:
+#
+#   ecs_service_arns: <<stack.output.ecs_service_arns>>
+#
+# Ravion infers strategy from the count: 1 = rolling, 2 = bluegreen. Target
+# groups and listeners are auto-discovered by the deploy manager — they're
+# NOT part of the module deployment schema. We use a single block expression
+# (not an inline array literal with two items) because the template engine
+# resolves block-mode expressions to their native type, preserving the array
+# shape; per-element resolution would require array-spread syntax which the
+# engine does not support.
+output "ecs_service_arns" {
+  value = local.is_bluegreen ? [
+    aws_ecs_service.app.id,
+    aws_ecs_service.app_green[0].id,
+  ] : [aws_ecs_service.app.id]
 }
 
 # ── IAM ──

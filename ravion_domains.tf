@@ -4,15 +4,16 @@
 # `domains_alb_attachment` does the whole dance in one resource:
 #   1. Allocates an FQDN under the platform apex (auto-domain).
 #   2. Issues the cluster wildcard ACM cert (idempotent per AWS account;
-#      blocks until ISSUED, ~30-90s).
+#      blocks until ISSUED, ~30-90s) — wired into the listener default.
 #   3. Writes the A-ALIAS pointing the auto-domain at this ALB.
-#   4. Issues per-custom-domain ACM certs (sit PENDING_VALIDATION until the
-#      user adds the ACM CNAMEs from the Domains tab to their DNS provider).
-#
-# The user wires the listener default cert from `default_cert_arn` and
-# attaches custom certs as SNI via `aws_lb_listener_certificate` for_each
-# below. No bootstrap cert, no JSON-encoded ALIAS targets, no manual
-# attachment plumbing.
+#   4. Issues per-custom-domain ACM certs. Once each cert reaches ISSUED,
+#      api-go's reconciler discovers the listener via the cluster cert's
+#      ACM `InUseBy` and attaches the cert as an additional SNI cert —
+#      no `aws_lb_listener_certificate` plumbing in user TF, no TF apply
+#      blocked on customer DNS.
+#   5. Once a custom domain is fully live (cert ISSUED + routing record
+#      MATCHED), the auto-domain DNS record is retired automatically so
+#      there's one canonical URL.
 # --------------------------------------------------------------------------
 
 resource "domains_alb_attachment" "main" {
@@ -23,16 +24,8 @@ resource "domains_alb_attachment" "main" {
   custom_domains = var.demo_domain == "" ? [] : [var.demo_domain]
 }
 
-# Custom-domain SNI attachments — stock AWS provider primitive driving off
-# the cert-arns map our resource exposes. Empty map = zero attachments.
-resource "aws_lb_listener_certificate" "ravion_custom" {
-  for_each        = domains_alb_attachment.main.custom_domain_cert_arns
-  listener_arn    = aws_lb_listener.https.arn
-  certificate_arn = each.value
-}
-
 output "ravion_default_url" {
-  description = "Auto-provisioned default URL for the service. HTTPS works immediately."
+  description = "Auto-provisioned default URL for the service. HTTPS works immediately. Retired automatically once a custom domain goes live."
   value       = domains_alb_attachment.main.default_url
 }
 
